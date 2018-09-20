@@ -14,10 +14,16 @@ public:
     void all_set_1();
     void all_set_0();
     BitArray(int bitSize);
+    char* getBits();
+
+    void weiYu(char * bits);
+    void weiHuo(char * bits);
+
     ~BitArray();
 private:
     char * bits;
-    int size;
+    int zhan;
+    int size;    //Bytes
 };
 
 #endif //SRC_BITARRAY_H

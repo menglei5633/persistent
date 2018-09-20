@@ -24,5 +24,16 @@ int main() {
     if (bl.is_inserted(c)) {
         printf("c\n");
     }
+    bl.all_set_1();
+    printf("after\n");
+    if (bl.is_inserted(a)) {
+        printf("a\n");
+    }
+    if (bl.is_inserted(b)) {
+        printf("b\n");
+    }
+    if (bl.is_inserted(c)) {
+        printf("c\n");
+    }
     return 0;
 }

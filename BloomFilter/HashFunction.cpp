@@ -10,6 +10,7 @@
 #include "HashFunction.h"
 
 unsigned int BasicHashFunction::hash(int *data) {
+//    printf("iiiiiii\n");
     int i;
     unsigned int value = 0;
 //    printf("dimission: %d\n", this->dimission);
@@ -18,10 +19,12 @@ unsigned int BasicHashFunction::hash(int *data) {
         value += this->a[i] * data[i];
     }
 //    printf("value: %d\n", value);
+    value = value % this->prime;
     return  value % this->b;
 }
 
 unsigned int BasicHashFunction::hash(char *data) {
+//    printf("BasicHashStart\n");
     unsigned int nLen = strlen((char*)data);
     assert(nLen <= this->dimission);
     unsigned char *p = (unsigned char*)data;
@@ -33,29 +36,36 @@ unsigned int BasicHashFunction::hash(char *data) {
         ++p;
         ++nIndex;
     }
+//    printf(" b: %d\n", this->b);
+    value = value % this->prime;
+//    printf("%d ___\n", value);
     return value % this->b;
 }
 
 unsigned int BKDRHashFunction::hash(int *data) {
+//    printf("nnnnnnnnnnn\n");
     unsigned int value = 0;
     int i;
     for (i = 0; i < this->dimission; ++i) {
         value += pow(this->seed, i) * data[i];
     }
+    value = value % this->prime;
     return value % this->b;
 }
 
 unsigned int BKDRHashFunction::hash(char *data) {
+//    printf("hashstart\n");
     unsigned char *p = (unsigned char*)data;
     unsigned int value = 0;
     unsigned int nIndex = 0;
     unsigned int nLen = strlen((char*)p);
-    while( *p )
+    while(*p)
     {
         value += pow(this->seed, nLen-nIndex-1)*(*p);
         ++p;
         nIndex++;
     }
+    value = value % this->prime;
     return value % this->b;
 }
 
@@ -68,7 +78,7 @@ HashFunction * HashFunctionFactory::createBasicHashFunction(unsigned int dimissi
     bhf->dimission = dimission;
 
     for (i = 0; i < dimission; ++i) {
-        bhf->a[i] = (unsigned int)HashFunctionFactory::genRandomInt(0, 100);
+        bhf->a[i] = (unsigned int)HashFunctionFactory::genRandomInt(0, 1000000);
 //        printf("__%d\n", hf.a[i]);
     }
     return bhf;
@@ -82,6 +92,7 @@ HashFunction * HashFunctionFactory::createBKDRHashFunction(unsigned int dimissio
     bhf->b = b;
 
     bhf->seed = HashFunctionFactory::genRandomJiShuInt(1, 100);
+//    printf("seed: %d\n", bhf->seed);
 
     return bhf;
 
@@ -109,6 +120,31 @@ void HashFunctionFactory::initRandom() {
     srandom(time(NULL));
 }
 
+HashFunction* HashFunctionFactory::copyBKDRHashFunction(BKDRHashFunction *hashFunction) {
+    BKDRHashFunction* bhf = new BKDRHashFunction();
+    bhf->dimission = hashFunction->dimission;
+    bhf->seed = hashFunction->seed;
+    bhf->b = hashFunction->b;
+    return bhf;
+}
+
+HashFunction* HashFunctionFactory::copyBasicHashFunction(BasicHashFunction *hashFunction) {
+    BasicHashFunction* bhf = new BasicHashFunction();
+    bhf->dimission = hashFunction->dimission;
+    bhf->b = hashFunction->b;
+    bhf->a = (unsigned int*)malloc(bhf->dimission * sizeof(unsigned int));
+    memcpy(bhf->a, hashFunction->a, bhf->dimission * sizeof(unsigned int));
+//    printf("_______________\n");
+//    int i;
+//    printf("________d:%d\n", bhf->dimission);
+//    for (i = 0; i < bhf->dimission; ++i) {
+//        printf("%d %d\n", hashFunction->a[i], bhf->a[i]);
+//    }
+
+    return bhf;
+}
+
 BasicHashFunction::~BasicHashFunction() {
+//    printf("hhhh\n");
     free(this->a);
 }
