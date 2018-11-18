@@ -1,3 +1,3 @@
 #bin/bash
-g++ main.cpp -o main.out BloomFilter/BloomFilter.cpp BloomFilter/HashFunction.cpp BloomFilter/BitArray.cpp HashTable/HashTable.cpp PresistentArgorithm/FindPresistent.cpp FileOption/FileOption.cpp
+g++ -o  main.out -std=c++11 BloomFilter/BloomFilter.cpp BloomFilter/GeneralHashFunctions.cpp BloomFilter/HashFunction.cpp BloomFilter/BitArray.cpp HashTable/HashTable.cpp PresistentArgorithm/FindPresistent.cpp FileOption/FileOption.cpp main.cpp 
 

@@ -35,10 +35,11 @@ int main(int argc, char* argv[]) {
 
     printf("start\n");
 
-    for (i = 0; i <= T; ++i) {
+    for (i = 0; i < T; ++i) {
         count = 0;
         printf("T : %d\n", i);
         for (k = 0; k < N; ++k) {
+//            printf("k : %d\n", k);
             fscanf(fp, "%s", buffer);
             for (j = 0; j < count; ++j) {
                 if (strcmp(buffer, epoch_items[j]) == 0) {

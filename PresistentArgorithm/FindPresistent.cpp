@@ -10,7 +10,7 @@
 #include "FindPresistent.h"
 
 
-FindPresistent::FindPresistent(FindPresistentParams *fpp) {
+FindPresistent::FindPresistent(FindPresistentParams *fpp, FILE* file) {
     printf("start\n");
     this->fpp = fpp;
     this->B = new BloomFilter(fpp->dimission, fpp->k, fpp->L);
@@ -50,7 +50,12 @@ FindPresistent::FindPresistent(FindPresistentParams *fpp) {
 
     this->b->all_set_0();
 
-//    this->b->printBitArray();
+    this->file = file;
+
+    this->tcam = new TCAM(fpp->TCAMSize, fpp->R);
+    this->tcams = new TCAM*[fpp->w];
+
+    //    this->b->printBitArray();
 }
 //
 //void FindPresistent::setFPP(FindPresistentParams *fpp) {
@@ -100,19 +105,29 @@ int FindPresistent::recording(char *data) {
     int i;
     unsigned int hashValue;
     unsigned int hashCount;
-    for (i = 0; i < this->fpp->d; ++i) {
-        hashValue = this->d_hashFunctions[i]->hash(data);
-        hashCount = this->SRAM->countOfBucket[hashValue];
-        if (hashCount < count) {
-            count = hashCount;
-            bucketIndex = hashValue;
-        } else if (hashCount == count) {
-            bucketIndex = bucketIndex > hashValue ? hashValue : bucketIndex;     // always go left
+    fprintf(this->file, "%s\n", data);
+    if (this->fpp->m > 0) {
+        for (i = 0; i < this->fpp->d; ++i) {
+            hashValue = this->d_hashFunctions[i]->hash(data);
+            hashCount = this->SRAM->countOfBucket[hashValue];
+            if (hashCount < count) {
+                count = hashCount;
+                bucketIndex = hashValue;
+            } else if (hashCount == count) {
+                bucketIndex = bucketIndex > hashValue ? hashValue : bucketIndex;     // always go left
+            }
         }
+        if (this->SRAM->add(bucketIndex, data) == 0) {   //bucket has full
+            return this->tcam->record(data);
+        } else {
+            return 1;
+        }
+    } else {
+        return this->tcam->record(data);
     }
 
     //has get bucket index to insert
-    return this->SRAM->add(bucketIndex, data);
+
 
 }
 
@@ -123,12 +138,20 @@ void FindPresistent::post_processing() {
 //    printf("table: %d\n", table);
     if (table <= this->fpp->w) {
         this->DRAM[table - 1] = new HashTable(*(this->SRAM));
+
 //        printf("copy end\n");
 //        printf("hashTable_____:\n");
 //        this->SRAM->print();
 //        printf("****************\n");
 //        this->DRAM[table - 1]->print();
         this->SRAM->clear();
+
+        this->tcams[table - 1] = new TCAM(*(this->tcam));
+        this->tcam->clear();
+//        for (int i = 0 ; i < this->tcams[table - 1]->getCount(); ++i) {
+//            printf("after copy: %d,  %s\n", table - 1, this->tcams[table - 1]->read(i));
+//        }
+
 //        printf("clear end\n");
     }
 
@@ -251,6 +274,11 @@ FindPresistent::~FindPresistent() {
         free(this->d_hashFunctions[i]);
     }
     free(this->d_hashFunctions);
+    for (i = 0; i < this->fpp->w; ++i) {
+        free(this->tcams[i]);
+    }
+    free(this->tcams);
+    free(this->tcam);
 //    printf("findpersistent end\n");
 }
 
@@ -262,6 +290,7 @@ void FindPresistent::writePersistentToFile(FILE *file) {
     int i, j, k;
     HashTable * hashTable;
     char ** bucket;
+
     for (i = 0; i < this->fpp->w; ++i) {
         hashTable = this->DRAM[i];
         for (j = 0; j < this->fpp->m; ++j) {
@@ -269,6 +298,15 @@ void FindPresistent::writePersistentToFile(FILE *file) {
             for (k = 0; k < hashTable->countOfBucket[j]; ++k) {
                 fprintf(file, "%s\n", this->DRAM[i]->buckets[j][k]);
             }
+        }
+    }
+//    printf("bbv\n");
+//    printf("remain:%d\n", this->TCAMRemainSize);{
+    for (j = 0; j < this->fpp->w; ++j) {
+//        printf("======j : %d  count : %d\n", j, this->tcams[j]->getCount());
+        for (i = 0; i < this->tcams[j]->getCount(); ++i) {
+//            printf("%s\n", this->tcams[j]->read(i));
+            fprintf(file, "%s\n", this->tcams[j]->read(i));
         }
     }
 }

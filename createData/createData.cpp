@@ -6,7 +6,7 @@
 #include <fstream>
 #include <assert.h>
 //#include "RandomStruct.h"
-#include "sha1.hpp"
+//#include "sha1.hpp"
 
 using namespace std;
 
@@ -17,6 +17,8 @@ int genRandomInt(int rangeStart, int rangeEnd) {
     assert(r >= rangeStart && r <= rangeEnd);
     return r;
 }
+
+
 
 int main(int argc, char* argv[]) {
 
@@ -36,16 +38,19 @@ int main(int argc, char* argv[]) {
 
     fileName = argv[8];    //stream file
     writeFileName = argv[9];   //persistent file
-    ofstream openfile(fileName, ios::out);
+//    ofstream openfile(fileName, ios::out);
+
+    FILE * file = fopen(fileName, "w");
 
     int step = 1;
 
-    SHA1 sha1;
+
+//    SHA1 sha1;
 
     srandom(time(NULL));
     int i, j, k;
-    int* epoch_item = (int*)malloc(n * sizeof(int));
-    int* other_item = (int*)malloc((N - per_num) * sizeof(int));
+    unsigned int* epoch_item = (unsigned int*)malloc(n * sizeof(unsigned int));
+    unsigned int* other_item = (unsigned int*)malloc((N - per_num) * sizeof(unsigned int));
     int* card = (int*)malloc((all_num - per_num) * sizeof(int));
     int* card1 = (int*)malloc((n) * sizeof(int));
 
@@ -128,31 +133,40 @@ int main(int argc, char* argv[]) {
         }
 
         for (j = 0; j < n; ++j) {
-            string input = to_string(epoch_item[j]);
-            sha1.update(input);
-            openfile << sha1.final() << endl;
+            unsigned int write = epoch_item[j] * 4000;
+            fprintf(file, "%d\n", write);
         }
 
     }
 
     for (i = 0; i < F; ++i) {
-        string input = to_string(genRandomInt(0, all_num-1));
-        sha1.update(input);
-        openfile << sha1.final() << endl;
+//        string input = to_string(genRandomInt(0, all_num-1));
+//        sha1.update(input);
+//        openfile << sha1.final() << endl;
+        unsigned int write = genRandomInt(0, all_num-1) * 4000;
+        fprintf(file, "%d\n", write);
     }
     printf("ddddd\n");
-    openfile.close();
+    fclose(file);
 
-    ofstream openfile1(writeFileName, ios::out);
+//    ofstream openfile1(writeFileName, ios::out);
+    file = fopen(writeFileName, "w");
+
     for (i = 0; i < per_num; ++i) {
-        string input = to_string(i);
-        sha1.update(input);
-        openfile1 << sha1.final() << endl;
+//        string input = to_string(i);
+//        sha1.update(input);
+//        openfile1 << sha1.final() << endl;
+        unsigned int write = i * 4000;
+        fprintf(file, "%d\n", write);
     }
 
-    openfile1.close();
+    fclose(file);
 //    free(other_item);
 //    free(persitent_item);
+    free(epoch_item);
+    free(other_item);
+    free(card);
+    free(card1);
 
     return 0;
 

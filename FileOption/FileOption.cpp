@@ -24,16 +24,20 @@ void DataFileOptions::readParam(FILE *fp, FindPresistentParams *fpp) {
     fscanf(fp, "%d", &(fpp->T));
 
     fscanf(fp, "%s", buffer);
+    fscanf(fp, "%d", &(fpp->c));
+
+    fscanf(fp, "%s", buffer);
+    fscanf(fp, "%d", &(fpp->R));
+
+    fscanf(fp, "%s", buffer);
     fscanf(fp, "%d", &(fpp->w));
+
 
     fscanf(fp, "%s", buffer);
     fscanf(fp, "%d", &(fpp->k));
 
     fscanf(fp, "%s", buffer);
     fscanf(fp, "%d", &(fpp->L));
-
-    fscanf(fp, "%s", buffer);
-    fscanf(fp, "%d", &(fpp->c));
 
     fscanf(fp, "%s", buffer);
     fscanf(fp, "%d", &(fpp->dimission));
@@ -44,14 +48,15 @@ void DataFileOptions::readParam(FILE *fp, FindPresistentParams *fpp) {
     fscanf(fp, "%s", buffer);
     fscanf(fp, "%d", &(fpp->m));
 
-    fscanf(fp, "%s", buffer);
-    fscanf(fp, "%d", &(fpp->R));
 
     fscanf(fp, "%s", buffer);
     fscanf(fp, "%d", &(fpp->isReconstruction));
 
     fscanf(fp, "%s", buffer);
     fscanf(fp, "%d", &(fpp->findNum));
+
+    fscanf(fp, "%s", buffer);
+    fscanf(fp, "%d", &(fpp->TCAMSize));
 
 
 }
@@ -68,6 +73,7 @@ void DataFileOptions::printParam(FindPresistentParams *fpp) {
     printf("m : %d\n", fpp->m);
     printf("R : %d\n", fpp->R);
     printf("isReconstruction : %d\n", fpp->isReconstruction);
+    printf("tcamsize: %d\n", fpp->TCAMSize);
 
     printf("fndnum : %d\n", fpp->findNum);
 

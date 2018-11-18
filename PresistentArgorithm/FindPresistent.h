@@ -5,9 +5,14 @@
 #ifndef SRC_FINDPRESISTENT_H
 #define SRC_FINDPRESISTENT_H
 
+
+
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include "../BloomFilter/BloomFilter.h"
 #include "../HashTable/HashTable.h"
-#include "../BloomFilter/HashFunction.h"
+//#include "../BloomFilter/HashFunction.h"
 
 
 //used for algorithm params
@@ -25,8 +30,91 @@ public:
     int R;      //Memory space to stock an item
     int isReconstruction;       //weither to Reconstruction after T epoch
     int findNum;        //the number of item to find
+    int TCAMSize;   //the size of tcam
+
+};
 
 
+class TCAM {
+public:
+    TCAM(int size, int R) {
+        this->size = size;
+        this->R = R;
+        this->count = 0;
+        if (size > 0) {
+            this->datas = new char*[size];
+            for (int i = 0; i < size; ++i) {
+                this->datas[i] = new char[R];
+            }
+        } else {
+            this->datas = nullptr;
+        }
+    }
+    TCAM() {
+        this->size = 0;
+        this->count = 0;
+        this->datas = nullptr;
+        this->R = 0;
+    }
+
+    TCAM(const TCAM &tcam) {
+        this->size = tcam.size;
+        this->count = tcam.count;
+        this->R = tcam.R;
+        if (this->size > 0) {
+            this->datas = new char*[size];
+            for (int i = 0; i < size; ++i) {
+                this->datas[i] = new char[R];
+            }
+            for (int i = 0; i < count; ++i) {
+                memcpy(this->datas[i], tcam.datas[i], this->R);
+//                printf("copy : %s\n", this->datas[i]);
+            }
+        } else {
+            this->datas = nullptr;
+        }
+    }
+
+    int record(char* data) {
+        if (this->count >= this->size) {
+            return 0;
+        } else {
+            memcpy(this->datas[this->count], data, this->R);
+            this->count++;
+            return 1;
+        }
+    }
+
+    char* read(int location) {
+        if (location < count) {
+            return this->datas[location];
+        } else {
+            return nullptr;
+        }
+    }
+
+    int getCount() {
+        return this->count;
+    }
+
+    void clear() {
+        this->count = 0;
+    }
+
+    ~TCAM() {
+        if (this->size <= 0) {
+            return;
+        }
+        for (int i = 0; i < this->size; ++i) {
+            free(this->datas[i]);
+        }
+        free(this->datas);
+    }
+private:
+    int size;
+    int count;
+    int R;
+    char** datas;
 };
 
 
@@ -39,8 +127,12 @@ private:
     HashTable** DRAM;
     HashFunction** d_hashFunctions;
     HashFunction* g;
+    FILE* file;
     int t;      //current epoch index
     int n;      //current item index in current epoch
+
+    TCAM* tcam;
+    TCAM** tcams;
 
     int pre_processing(char* data);
     int recording(char* data);
@@ -52,7 +144,7 @@ private:
 
 
 public:
-    FindPresistent(FindPresistentParams* fpp);
+    FindPresistent(FindPresistentParams* fpp, FILE* file);
 //    void setFPP(FindPresistentParams * fpp);
 
     ~FindPresistent();

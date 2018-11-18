@@ -3,15 +3,17 @@
 paramfile=$1
 datafile=$2
 resfile=$3
-startline=$4
-exactfile=$5
-N=$6
-T=$7
-is=$8
+resfile2=$4
+startline=$5
+exactfile=$6
+N=$7
+T=$8
+L=$9
+m=${10}
+ts=${11}
+w=${12}
+c=${13}
+d=${14}
 
-./main.out $datafile  $paramfile $resfile $startline
-
-if [ $is == "1" ]; then
-	./exactPersistent/exactPersistent.out $N $T $startline $datafile $exactfile
-fi
-./tongji/tongji.sh $exactfile $resfile 
+./main.out $datafile  $paramfile $resfile $resfile2 $startline $L $m $ts $w $c $d > main.result
+./tongji/tongji.sh $exactfile $resfile $resfile2
