@@ -55,8 +55,9 @@ void printCmd(FindPresistentParams fpp, char *cmd) {
     sprintf(cmd, "./algorithm.sh %s %s %s %s %d %s %d %d %d %d %d %d %d %d", fpp.paramFile, fpp.daraFile, fpp.resFile,
             fpp.resFile2, fpp.startline, fpp.exactFileName, fpp.N, fpp.T, fpp.L, fpp.m, fpp.tcamsize, fpp.w, fpp.c,
             fpp.d);
-   printf("%s\n", cmd);
+//    printf("%s\n", cmd);
 }
+
 void do_cmd(FindPresistentParams &fpp, int &all_allper, int &all_correct, int &all_wrong) {
     char cmd[200];
     int all_per, correct, wrong;
@@ -70,82 +71,6 @@ void do_cmd(FindPresistentParams &fpp, int &all_allper, int &all_correct, int &a
     all_correct += correct;
     all_wrong += wrong;
 }
-
-void best_test(FindPresistentParams &fpp) {
-    int all_correct1, all_wrong1;
-    int all_correct2, all_wrong2;
-    int all_allper, all_correct, all_wrong;
-    int i, j, k;
-    int Pfn, Pfp;
-    all_allper = all_correct = all_wrong = 0;
-    for (i = 0; i < fpp.numOfAgain; ++i) {
-        do_cmd(fpp, all_allper, all_correct, all_wrong);
-    }
-    Pfn = 1.0 * (all_allper - all_correct) / all_allper;
-    Pfp = 1.0 * all_wrong / (fpp.numOfAgain * fpp.allItemNum - all_allper);
-
-    if (Pfn <= fpp.target_fn && Pfp <= fpp.target_fp) {
-        while (Pfn <= fpp.target_fn  && Pfp <= fpp.target_fp && fpp.m > 0) {
-            all_allper = all_correct = all_wrong = 0;
-            fpp.L -= 100;
-            printf("trace m for Pfn: %d\n", fpp.m);
-            for (i = 0; i < fpp.numOfAgain; ++i) {
-                do_cmd(fpp, all_allper, all_correct, all_wrong);
-            }          
-            Pfn = 1.0 * (all_allper - all_correct) / all_allper;
-            Pfp = 1.0 * all_wrong / (fpp.numOfAgain * fpp.allItemNum - all_allper);
-        }
-        fpp.L += 100;
-    } else {
-        while (Pfn > fpp.target_fn || Pfp > fpp.target_fp) {
-            int L_plus = fpp.c * fpp.R * 8;
-            printf("尝试将L增加%d\n", L_plus);
-            fpp.L += L_plus;
-            all_allper = all_correct = all_wrong = 0;
-            printf("m:%d  L:%d\n", fpp.m, fpp.L);
-            for (i = 0; i < fpp.numOfAgain; ++i) {
-                do_cmd(fpp, all_allper, all_correct, all_wrong);
-            }
-            all_correct1 = all_correct; all_wrong1 = all_wrong;
-
-            fpp.L -= L_plus;
-            printf("尝试将m增加1\n");
-            fpp.m++;
-            all_allper = all_correct = all_wrong = 0;
-            for (i = 0; i < fpp.numOfAgain; ++i) {
-                do_cmd(fpp, all_allper, all_correct, all_wrong);
-            }
-            fpp.m--;
-            all_correct2 = all_correct; all_wrong2 = all_wrong;
-            if (all_correct1 > all_correct2) {
-                printf("选择增加L\n");
-                fpp.L += L_plus;
-                Pfn = 1.0 * (all_allper - all_correct1) / all_allper;
-                Pfp = 1.0 * all_wrong1 / (fpp.numOfAgain * fpp.allItemNum - all_allper);
-            } else {
-                printf("选择增加m\n");
-                fpp.m++;
-                Pfn = 1.0 * (all_allper - all_correct2) / all_allper;
-                Pfp = 1.0 * all_wrong2 / (fpp.numOfAgain * fpp.allItemNum - all_allper);
-            }
-            printf("本轮之后的结果 m:%d  L:%d\n", fpp.m, fpp.L);
-        }
-    }
-    while (Pfn <= fpp.target_fn && Pfp <= fpp.target_fp && fpp.L > fpp.endL) {
-        all_allper = all_correct = all_wrong = 0;
-        fpp.L -= 50;
-        // printf("trace L for Pfn: %d\n", fpp.L);
-        for (i = 0; i < fpp.numOfAgain; ++i) {
-            do_cmd(fpp, all_allper, all_correct, all_wrong);
-        }
-        Pfn = 1.0 * (all_allper - all_correct) / all_allper;
-        Pfp = 1.0 * all_wrong2 / (fpp.numOfAgain * fpp.allItemNum - all_allper);
-    }
-    fpp.L += 50;
-    printf("met!!!!!\n");
-}
-
-
 
 void test_one_time(FindPresistentParams &fpp) {
     //printParam(fpp);
@@ -466,16 +391,56 @@ int main(int argc, char *argv[]) {
                 for (p = 0; p < d_num; ++p) {  //d
                     fpp.d = d[p];
 
-                    //取最低点
-                    fpp.L = 10000;
+                    fpp.L = 30000;
                     fpp.m = 0;
 
-                    for (q = fp_fn_size - 1; q >= 0; --q) {
+                    fpp.target_fn = target_pfn[0];
+                    fpp.target_fp = target_pfp[0];
+
+                    printf("====================\n");
+                    printf("find range of m\n");
+                    printf("====================\n");
+
+                    test_one_time(fpp);
+                    //printResult(fpp, resultfile);
+
+                    startm = 0;
+                    endm = fpp.m + 10;
+                    fpp.L = 30000;
+                    printf("range m: %d - %d\n", startm, endm);
+
+                    for (q = 0; q < fp_fn_size; ++q) {             //真阳率假阳率迭代
                         fpp.target_fn = target_pfn[q];
                         fpp.target_fp = target_pfp[q];
-                        best_test(fpp);
-                        fprintf(resultfile, "\n\n");
+                        printf("====================\n");
+                        printf("target pfn: %f pfp: %f\n", fpp.target_fn, fpp.target_fp);
+                        printf("====================\n");
+
+                        min_mem = 1000000000;
+                        min_L = 100000000;
+                        min_m = 100000000;
+
+                        fpp.L = fpp.L + 500;
+                        for (x = startm; x < endm; ++x) {
+                            fpp.m = x;
+                            new_test(fpp);
+                            printf("m: %d\n", fpp.m);
+                            //computeMem(fpp);
+                            if (fpp.mem < min_mem) {
+                                printf("update\n");
+                                min_m = fpp.m;
+                                min_L = fpp.L;
+                                min_mem = fpp.mem;
+                            }
+                        }
+                        fpp.m = min_m;
+                        fpp.L = min_L;
+                        fpp.mem = min_mem;
+                        printResult(fpp, resultfile);
+
                     }
+
+                    fprintf(resultfile, "\n\n");
                 }
             }
         }

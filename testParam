@@ -1,7 +1,7 @@
 paramFile
 ./param.txt
 dataFile
-./data/chic.txt
+./data/aaa_s_02T.txt
 resFile
 ./aaa_res.txt
 resFile2
@@ -9,7 +9,7 @@ resFile2
 startline
 0
 exactFileName
-./data/chic_exact_0.txt
+./data/aaa_s_02T_exact.txt
 isExact
 1
 numOfAgain
@@ -27,4 +27,4 @@ endL
 endm
 50
 allItemNum
-83960
+228013

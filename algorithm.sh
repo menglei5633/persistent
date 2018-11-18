@@ -15,5 +15,5 @@ w=${12}
 c=${13}
 d=${14}
 
-./main.out $datafile  $paramfile $resfile $resfile2 $startline $L $m $ts $w $c $d > main.result
+./main.out $datafile  $paramfile $resfile $resfile2 $startline $L $m $ts $w $c $d
 ./tongji/tongji.sh $exactfile $resfile $resfile2
