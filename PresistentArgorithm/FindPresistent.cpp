@@ -10,7 +10,7 @@
 #include "FindPresistent.h"
 
 
-FindPresistent::FindPresistent(FindPresistentParams *fpp, FILE* file) {
+FindPresistent::FindPresistent(FindPresistentParams *fpp) {
     printf("start\n");
     this->fpp = fpp;
     this->B = new BloomFilter(fpp->dimission, fpp->k, fpp->L);
@@ -50,7 +50,7 @@ FindPresistent::FindPresistent(FindPresistentParams *fpp, FILE* file) {
 
     this->b->all_set_0();
 
-    this->file = file;
+    // this->file = file;
 
     this->tcam = new TCAM(fpp->TCAMSize, fpp->R);
     this->tcams = new TCAM*[fpp->w];
@@ -105,7 +105,8 @@ int FindPresistent::recording(char *data) {
     int i;
     unsigned int hashValue;
     unsigned int hashCount;
-    fprintf(this->file, "%s\n", data);
+    // fprintf(this->file, "%s\n", data);
+    this->persistents_all.insert(std::string(data));
     if (this->fpp->m > 0) {
         for (i = 0; i < this->fpp->d; ++i) {
             hashValue = this->d_hashFunctions[i]->hash(data);
@@ -286,8 +287,35 @@ FindPresistent::~FindPresistent() {
 //    printf("correct: %d    wrong: %d  \n", this->correct, this->wrong);
 //}
 
-void FindPresistent::writePersistentToFile(FILE *file) {
-    int i, j, k;
+// void FindPresistent::writePersistentToFile(FILE *file) {
+//     int i, j, k;
+//     HashTable * hashTable;
+//     char ** bucket;
+
+//     for (i = 0; i < this->fpp->w; ++i) {
+//         hashTable = this->DRAM[i];
+//         for (j = 0; j < this->fpp->m; ++j) {
+//             bucket = hashTable->buckets[j];
+//             for (k = 0; k < hashTable->countOfBucket[j]; ++k) {
+//                 fprintf(file, "%s\n", this->DRAM[i]->buckets[j][k]);
+//                 // this->persistents_insert.push_back(std::string(this->DRAM[i]->buckets[j][k]))
+//             }
+//         }
+//     }
+// //    printf("bbv\n");
+// //    printf("remain:%d\n", this->TCAMRemainSize);{
+//     for (j = 0; j < this->fpp->w; ++j) {
+// //        printf("======j : %d  count : %d\n", j, this->tcams[j]->getCount());
+//         for (i = 0; i < this->tcams[j]->getCount(); ++i) {
+// //            printf("%s\n", this->tcams[j]->read(i));
+//             fprintf(file, "%s\n", this->tcams[j]->read(i));
+//             // this->persistents_insert.push_back(std::string(this->tcams[j]->read(i)));
+//         }
+//     }
+// }
+
+void FindPresistent::writePersistentToVector(){
+        int i, j, k;
     HashTable * hashTable;
     char ** bucket;
 
@@ -296,7 +324,8 @@ void FindPresistent::writePersistentToFile(FILE *file) {
         for (j = 0; j < this->fpp->m; ++j) {
             bucket = hashTable->buckets[j];
             for (k = 0; k < hashTable->countOfBucket[j]; ++k) {
-                fprintf(file, "%s\n", this->DRAM[i]->buckets[j][k]);
+                // fprintf(file, "%s\n", this->DRAM[i]->buckets[j][k]);
+                this->persistents_insert.insert(std::string(this->DRAM[i]->buckets[j][k]));
             }
         }
     }
@@ -306,7 +335,8 @@ void FindPresistent::writePersistentToFile(FILE *file) {
 //        printf("======j : %d  count : %d\n", j, this->tcams[j]->getCount());
         for (i = 0; i < this->tcams[j]->getCount(); ++i) {
 //            printf("%s\n", this->tcams[j]->read(i));
-            fprintf(file, "%s\n", this->tcams[j]->read(i));
+            // fprintf(file, "%s\n", this->tcams[j]->read(i));
+            this->persistents_insert.insert(std::string(this->tcams[j]->read(i)));
         }
     }
 }

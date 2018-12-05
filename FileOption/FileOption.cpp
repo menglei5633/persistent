@@ -14,7 +14,9 @@ void DataFileOptions::readAllDataToArray(FILE *fp, char **array, int lineNum) {
     }
 }
 
-void DataFileOptions::readParam(FILE *fp, FindPresistentParams *fpp) {
+void DataFileOptions::readParam(std::string filename, FindPresistentParams *fpp) {
+    FILE* fp = fopen(filename.c_str(), "r");
+    assert(fp != NULL);
     char buffer[50];
 
     fscanf(fp, "%s", buffer);
@@ -57,7 +59,7 @@ void DataFileOptions::readParam(FILE *fp, FindPresistentParams *fpp) {
 
     fscanf(fp, "%s", buffer);
     fscanf(fp, "%d", &(fpp->TCAMSize));
-
+    fclose(fp);
 
 }
 

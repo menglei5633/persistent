@@ -10,6 +10,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <vector>
+#include <string>
+#include <set>
 #include "../BloomFilter/BloomFilter.h"
 #include "../HashTable/HashTable.h"
 //#include "../BloomFilter/HashFunction.h"
@@ -144,7 +147,7 @@ private:
 
 
 public:
-    FindPresistent(FindPresistentParams* fpp, FILE* file);
+    FindPresistent(FindPresistentParams* fpp);
 //    void setFPP(FindPresistentParams * fpp);
 
     ~FindPresistent();
@@ -154,7 +157,11 @@ public:
     int look_up_item(char* data_id, char* data_buffer);
     void list_reconstruction();
 
-    void writePersistentToFile(FILE* file);
+    std::set<std::string> persistents_insert;    //记录记录到hashtable中的item
+    std::set<std::string> persistents_all;       //记录所有persistent，包括因hashtable空间不够而未存储的
+
+    // void writePersistentToFile(FILE* file);
+    void writePersistentToVector();
 
     void printHashTable();
 };

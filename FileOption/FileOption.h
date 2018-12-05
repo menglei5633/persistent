@@ -6,6 +6,8 @@
 #define SRC_FILEOPTION_H
 
 #include <stdio.h>
+#include <string>
+#include <assert.h>
 #include "../PresistentArgorithm/FindPresistent.h"
 
 
@@ -13,7 +15,7 @@ class DataFileOptions {
 public:
     static void readAllDataToArray(FILE* fp, char** array, int lineNum);
     static void readOneLine(FILE* fp, char* buffer);
-    static void readParam(FILE* fp, FindPresistentParams* fpp);
+    static void readParam(std::string filename, FindPresistentParams* fpp);
     static void printParam(FindPresistentParams* fpp);
 };
 
